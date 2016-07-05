@@ -13,8 +13,7 @@
 
 local AnimationLoader = {}
 
-local GAME_CONSTANT = require("res.data.GameConstant")
-
+local AnimationData         = require("res.data.AnimationData")
 local GameConstantFunctions = require("app.utilities.GameConstantFunctions")
 
 --------------------------------------------------------------------------------
@@ -29,17 +28,18 @@ local function getTileAnimationName(tileName, shapeIndex)
 end
 
 local function loadTileAnimations()
-    for tileName, data in pairs(GAME_CONSTANT.tileAnimations) do
+    for typeIndex, data in ipairs(AnimationData.tileAnimations) do
         for shapeIndex = 1, data.shapesCount do
-            local pattern = string.format("c01_t%02d_s%02d_%s.png", data.typeIndex, shapeIndex, "f%02d")
+            local pattern   = string.format("c01_t%02d_s%02d_f%%02d.png", typeIndex, shapeIndex)
             local animation = display.newAnimation(display.newFrames(pattern, 1, data.framesCount), data.durationPerFrame)
-            display.setAnimationCache(getTileAnimationName(tileName, shapeIndex), animation)
+
+            display.setAnimationCache(getTileAnimationName(data.tileType, shapeIndex), animation)
         end
     end
 end
 
 local function loadUnitAnimations()
-    for unitName, animationsForPlayers in pairs(GAME_CONSTANT.unitAnimations) do
+    for unitName, animationsForPlayers in pairs(AnimationData.unitAnimations) do
         for playerIndex, animations in ipairs(animationsForPlayers) do
             local normal          = animations.normal
             local normalAnimation = display.newAnimation(display.newFrames(normal.pattern, 1, normal.framesCount), normal.durationPerFrame)

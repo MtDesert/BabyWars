@@ -22,7 +22,7 @@
 --     从游戏的角度来看：
 --       一个TiledID就代表了一个unit或tile，因此游戏必须能够以TiledID重建一个完整的unit或tile。
 --       为此，在GameConstant内列出游戏所有的unit和tile的模板，也就是templateModelUnits/templateModelTiles。
---       同时，通过GameConstant.indexesForTileOrUnit，使得每一个TiledID都和正确的unit或tile的模板联系起来，这就使得ModelUnit/ModelTile能够仅通过TiledID来获取模板并初始化自身。
+--       同时，通过GameConstant.tiledIdData，使得每一个TiledID都和正确的unit或tile的模板联系起来，这就使得ModelUnit/ModelTile能够仅通过TiledID来获取模板并初始化自身。
 --       通过模板初始化的tile/unit都是满血满状态的，但游戏中它们的状态都有可能发生变化。模板无法记录这些变化，因此使用别的机制来记录这些变化（参考ModelTile/ModelUnit）。
 --
 --   - 关于PlayerIndex：
@@ -45,8 +45,7 @@ local GRID_SIZE            = GAME_CONSTANT.gridSize
 local UNIT_NAMES           = GAME_CONSTANT.categories.AllUnits
 local TEMPLATE_MODEL_TILES = GAME_CONSTANT.templateModelTiles
 local TEMPLATE_MODEL_UNITS = GAME_CONSTANT.templateModelUnits
-local TILE_ANIMATIONS      = GAME_CONSTANT.tileAnimations
-local TILE_UNIT_INDEXES    = {}
+local TILED_ID_DATA        = {}
 
 local FATAL_DAMAGE     = 90
 local EFFECTIVE_DAMAGE = 50
@@ -56,13 +55,17 @@ local s_IsInitialized = false
 --------------------------------------------------------------------------------
 -- The util functions.
 --------------------------------------------------------------------------------
-local function initTileUnitIndexes()
-    for _, data in ipairs(GAME_CONSTANT.indexesForTileOrUnit) do
+local function initTiledIdData()
+    for _, data in ipairs(GAME_CONSTANT.tiledIdData) do
         local name        = data.name
         local playerIndex = data.firstPlayerIndex
 
         for shapeIndex = 1, data.shapesCount do
-            TILE_UNIT_INDEXES[#TILE_UNIT_INDEXES + 1] = {name = name, playerIndex = playerIndex, shapeIndex = shapeIndex}
+            TILED_ID_DATA[#TILED_ID_DATA + 1] = {
+                name        = name,
+                playerIndex = playerIndex,
+                shapeIndex  = shapeIndex,
+            }
             playerIndex = (data.isSamePlayerIndex) and (playerIndex) or (playerIndex + 1)
         end
     end
@@ -142,7 +145,7 @@ function GameConstantFunctions.init()
     if (not s_IsInitialized) then
         s_IsInitialized = true
 
-        initTileUnitIndexes()
+        initTiledIdData()
         initUnitAttackAndDefenseList()
     end
 end
@@ -172,7 +175,7 @@ function GameConstantFunctions.getLevelBonus()
 end
 
 function GameConstantFunctions.getTiledIdWithTileOrUnitName(name, playerIndex)
-    for id, index in ipairs(TILE_UNIT_INDEXES) do
+    for id, index in ipairs(TILED_ID_DATA) do
         if ((index.name == name) and
             ((not playerIndex) or (playerIndex == index.playerIndex))) then
                 return id
@@ -183,7 +186,7 @@ function GameConstantFunctions.getTiledIdWithTileOrUnitName(name, playerIndex)
 end
 
 function GameConstantFunctions.getTileTypeWithTiledId(tiledID)
-    return TILE_UNIT_INDEXES[tiledID].name
+    return TILED_ID_DATA[tiledID].name
 end
 
 function GameConstantFunctions.getTileTypeWithObjectAndBaseId(objectID, baseID)
@@ -205,15 +208,15 @@ function GameConstantFunctions.getTileTypeWithObjectAndBaseId(objectID, baseID)
 end
 
 function GameConstantFunctions.getUnitTypeWithTiledId(tiledID)
-    return TILE_UNIT_INDEXES[tiledID].name
+    return TILED_ID_DATA[tiledID].name
 end
 
 function GameConstantFunctions.getPlayerIndexWithTiledId(tiledID)
-    return TILE_UNIT_INDEXES[tiledID].playerIndex
+    return TILED_ID_DATA[tiledID].playerIndex
 end
 
 function GameConstantFunctions.getShapeIndexWithTiledId(tiledID)
-    return TILE_UNIT_INDEXES[tiledID].shapeIndex
+    return TILED_ID_DATA[tiledID].shapeIndex
 end
 
 function GameConstantFunctions.getTemplateModelTileWithObjectAndBaseId(objectID, baseID)
@@ -221,19 +224,11 @@ function GameConstantFunctions.getTemplateModelTileWithObjectAndBaseId(objectID,
 end
 
 function GameConstantFunctions.getTemplateModelUnitWithTiledId(tiledID)
-    return TEMPLATE_MODEL_UNITS[TILE_UNIT_INDEXES[tiledID].name]
+    return TEMPLATE_MODEL_UNITS[TILED_ID_DATA[tiledID].name]
 end
 
 function GameConstantFunctions.getTemplateModelUnitWithName(name)
     return TEMPLATE_MODEL_UNITS[name]
-end
-
-function GameConstantFunctions.doesViewTileFillGrid(tiledID)
-    if ((not tiledID) or (tiledID == 0)) then
-        return false
-    else
-        return TILE_ANIMATIONS[GameConstantFunctions.getTileTypeWithTiledId(tiledID)].fillsGrid
-    end
 end
 
 function GameConstantFunctions.getCategory(categoryType)
