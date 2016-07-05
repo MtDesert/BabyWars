@@ -45,19 +45,19 @@ end
 -- The callback functions on ComponentManager.bindComponent()/unbindComponent().
 --------------------------------------------------------------------------------
 function MoveCostOwner:onBind(target)
-    assert(self.m_Target == nil, "MoveCostOwner:onBind() the component has already bound a target.")
+    assert(self.m_Owner == nil, "MoveCostOwner:onBind() the component has already bound a target.")
 
     ComponentManager.setMethods(target, self, EXPORTED_METHODS)
-    self.m_Target = target
+    self.m_Owner = target
 
     return self
 end
 
 function MoveCostOwner:onUnbind()
-    assert(self.m_Target ~= nil, "MoveCostOwner:onUnbind() the component has not bound to a target.")
+    assert(self.m_Owner ~= nil, "MoveCostOwner:onUnbind() the component has not bound to a target.")
 
-    ComponentManager.unsetMethods(self.m_Target, EXPORTED_METHODS)
-    self.m_Target = nil
+    ComponentManager.unsetMethods(self.m_Owner, EXPORTED_METHODS)
+    self.m_Owner = nil
 
     return self
 end

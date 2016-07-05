@@ -88,19 +88,19 @@ end
 -- The callback functions on ComponentManager.bindComponent()/unbindComponent().
 --------------------------------------------------------------------------------
 function LevelOwner:onBind(target)
-    assert(self.m_Target == nil, "LevelOwner:onBind() the LevelOwner has already bound a target.")
+    assert(self.m_Owner == nil, "LevelOwner:onBind() the LevelOwner has already bound a target.")
 
     ComponentManager.setMethods(target, self, EXPORTED_METHODS)
-    self.m_Target = target
+    self.m_Owner = target
 
     return self
 end
 
 function LevelOwner:onUnbind()
-    assert(self.m_Target, "LevelOwner:unbind() the component has not bound a target.")
+    assert(self.m_Owner, "LevelOwner:unbind() the component has not bound a target.")
 
-    ComponentManager.unsetMethods(self.m_Target, EXPORTED_METHODS)
-    self.m_Target = nil
+    ComponentManager.unsetMethods(self.m_Owner, EXPORTED_METHODS)
+    self.m_Owner = nil
 
     return self
 end

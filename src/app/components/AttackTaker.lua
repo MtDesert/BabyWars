@@ -102,19 +102,19 @@ end
 -- The callback functions on ComponentManager.bindComponent()/unbindComponent().
 --------------------------------------------------------------------------------
 function AttackTaker:onBind(target)
-    assert(self.m_Target == nil, "AttackTaker:onBind() the component has already bound a target.")
+    assert(self.m_Owner == nil, "AttackTaker:onBind() the component has already bound a target.")
 
     ComponentManager.setMethods(target, self, EXPORTED_METHODS)
-    self.m_Target = target
+    self.m_Owner = target
 
     return self
 end
 
 function AttackTaker:onUnbind()
-    assert(self.m_Target ~= nil, "AttackTaker:onUnbind() the component has not bound a target.")
+    assert(self.m_Owner ~= nil, "AttackTaker:onUnbind() the component has not bound a target.")
 
-    ComponentManager.unsetMethods(self.m_Target, EXPORTED_METHODS)
-    self.m_Target = nil
+    ComponentManager.unsetMethods(self.m_Owner, EXPORTED_METHODS)
+    self.m_Owner = nil
 
     return self
 end
@@ -126,15 +126,15 @@ function AttackTaker:doActionAttack(action, isAttacker)
     if (isAttacker) then
         self:setCurrentHP(math.max(self:getCurrentHP() - (action.counterDamage or 0), 0))
         if (self:getCurrentHP() <= 0) then
-            self.m_RootScriptEventDispatcher:dispatchEvent({name = "EvtDestroyModelUnit", gridIndex = self.m_Target:getGridIndex()})
+            self.m_RootScriptEventDispatcher:dispatchEvent({name = "EvtDestroyModelUnit", gridIndex = self.m_Owner:getGridIndex()})
         end
     else
         self:setCurrentHP(math.max(self:getCurrentHP() - action.attackDamage, 0))
         if (self:getCurrentHP() <= 0) then
             if (action.targetType == "unit") then
-                self.m_RootScriptEventDispatcher:dispatchEvent({name = "EvtDestroyModelUnit", gridIndex = self.m_Target:getGridIndex()})
+                self.m_RootScriptEventDispatcher:dispatchEvent({name = "EvtDestroyModelUnit", gridIndex = self.m_Owner:getGridIndex()})
             else
-                self.m_RootScriptEventDispatcher:dispatchEvent({name = "EvtDestroyModelTile", gridIndex = self.m_Target:getGridIndex()})
+                self.m_RootScriptEventDispatcher:dispatchEvent({name = "EvtDestroyModelTile", gridIndex = self.m_Owner:getGridIndex()})
             end
         end
     end
@@ -157,7 +157,7 @@ function AttackTaker:setCurrentHP(hp)
     assert((hp >= 0) and (hp <= math.max(UNIT_MAX_HP, TILE_MAX_HP)) and (hp == math.floor(hp)), "AttackTaker:setCurrentHP() the param hp is invalid.")
     self.m_CurrentHP = hp
 
-    return self.m_Target
+    return self.m_Owner
 end
 
 function AttackTaker:getNormalizedCurrentHP()

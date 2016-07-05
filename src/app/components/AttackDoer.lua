@@ -137,7 +137,7 @@ local function getBattleDamage(self, attackerTile, target, targetTile, modelPlay
         return nil, nil
     end
 
-    local attacker = self.m_Target
+    local attacker = self.m_Owner
     local attackDamage = getAttackDamage(attacker, attackerTile, attacker:getCurrentHP(), target, targetTile, modelPlayerManager, weather)
     assert(attackDamage, "AttackDoer-getBattleDamage() failed to get the attack damage.")
 
@@ -216,19 +216,19 @@ end
 -- The callback functions on ComponentManager.bindComponent()/unbindComponent().
 --------------------------------------------------------------------------------
 function AttackDoer:onBind(target)
-    assert(self.m_Target == nil, "AttackDoer:onBind() the component has already bound a target.")
+    assert(self.m_Owner == nil, "AttackDoer:onBind() the component has already bound a target.")
 
     ComponentManager.setMethods(target, self, EXPORTED_METHODS)
-    self.m_Target = target
+    self.m_Owner = target
 
     return self
 end
 
 function AttackDoer:onUnbind()
-    assert(self.m_Target ~= nil, "AttackDoer:onUnbind() the component has not bound a target.")
+    assert(self.m_Owner ~= nil, "AttackDoer:onUnbind() the component has not bound a target.")
 
-    ComponentManager.unsetMethods(self.m_Target, EXPORTED_METHODS)
-    self.m_Target = nil
+    ComponentManager.unsetMethods(self.m_Owner, EXPORTED_METHODS)
+    self.m_Owner = nil
 
     return self
 end
@@ -300,8 +300,8 @@ function AttackDoer:canAttackTarget(attackerGridIndex, target, targetGridIndex)
     if ((not target) or
         (not target.getDefenseType) or
         (not isInAttackRange(attackerGridIndex, targetGridIndex, self:getAttackRangeMinMax())) or
-        ((not GridIndexFunctions.isEqual(self.m_Target:getGridIndex(), attackerGridIndex) and (not self:canAttackAfterMove()))) or
-        (self.m_Target:getPlayerIndex() == target:getPlayerIndex())) then
+        ((not GridIndexFunctions.isEqual(self.m_Owner:getGridIndex(), attackerGridIndex) and (not self:canAttackAfterMove()))) or
+        (self.m_Owner:getPlayerIndex() == target:getPlayerIndex())) then
         return false
     end
 

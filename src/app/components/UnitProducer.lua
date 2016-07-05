@@ -47,19 +47,19 @@ end
 -- The callback functions on ComponentManager.bindComponent()/unbindComponent().
 --------------------------------------------------------------------------------
 function UnitProducer:onBind(target)
-    assert(self.m_Target == nil, "UnitProducer:onBind() the component has already bound a target.")
+    assert(self.m_Owner == nil, "UnitProducer:onBind() the component has already bound a target.")
 
     ComponentManager.setMethods(target, self, EXPORTED_METHODS)
-    self.m_Target = target
+    self.m_Owner = target
 
     return self
 end
 
 function UnitProducer:onUnbind()
-    assert(self.m_Target ~= nil, "UnitProducer:onUnbind() the component has not bound to a target.")
+    assert(self.m_Owner ~= nil, "UnitProducer:onUnbind() the component has not bound to a target.")
 
-    ComponentManager.unsetMethods(self.m_Target, EXPORTED_METHODS)
-    self.m_Target = nil
+    ComponentManager.unsetMethods(self.m_Owner, EXPORTED_METHODS)
+    self.m_Owner = nil
 
     return self
 end
@@ -68,7 +68,7 @@ end
 -- The exported functions.
 --------------------------------------------------------------------------------
 function UnitProducer:getProductionCostWithTiledId(tiledID, modelPlayer)
-    if (GameConstantFunctions.getPlayerIndexWithTiledId(tiledID) ~= self.m_Target:getPlayerIndex()) then
+    if (GameConstantFunctions.getPlayerIndexWithTiledId(tiledID) ~= self.m_Owner:getPlayerIndex()) then
         return nil
     end
 
@@ -80,7 +80,7 @@ end
 function UnitProducer:getProductionList(modelPlayer)
     local list        = {}
     local fund        = modelPlayer:getFund()
-    local playerIndex = self.m_Target:getPlayerIndex()
+    local playerIndex = self.m_Owner:getPlayerIndex()
 
     for i, unitName in ipairs(self.m_Template.productionList) do
         local tiledID = GameConstantFunctions.getTiledIdWithTileOrUnitName(unitName, playerIndex)
